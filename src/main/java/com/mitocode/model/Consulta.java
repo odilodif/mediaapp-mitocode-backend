@@ -23,6 +23,7 @@ public class Consulta {
 	private Integer idConsulta;
 
 	// JPQL
+	//from Consulta v where c.medico.idMedico=? E//Esta orientado a Objetos 
 	
 	/* De varios escoges una clave Foreanea*/
 	@ManyToOne
@@ -50,7 +51,7 @@ public class Consulta {
 	private List<DetalleConsulta> detalleConsulta;
 
 	@Override
-	public int hashCode() {
+	public int hashCode() {// para calores duplicados
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((idConsulta == null) ? 0 : idConsulta.hashCode());

@@ -18,14 +18,18 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.mitocode.dto.ConsultaListaExamenDTO;
 import com.mitocode.dto.ConsultaResumenDTO;
 import com.mitocode.dto.FiltroConsultaDTO;
 import com.mitocode.exception.ModeloNotFoundExeption;
+import com.mitocode.model.Archivo;
 import com.mitocode.model.Consulta;
+import com.mitocode.service.IArchivoService;
 import com.mitocode.service.IConsultaService;
 
 import net.sf.jasperreports.engine.JRException;
@@ -42,6 +46,9 @@ public class ConsultaController {
 
 	@Autowired
 	private IConsultaService service;
+	
+	@Autowired
+	private IArchivoService serviceArchivo;
 
 	@GetMapping
 	public ResponseEntity<List<Consulta>> listar() {
@@ -121,8 +128,6 @@ public class ConsultaController {
 		return new ResponseEntity<List<Consulta>>(consultas, HttpStatus.OK);
 	}
 
-	
-	
 	@GetMapping(value = "/listarResumen")
 	public ResponseEntity<List<ConsultaResumenDTO>> listarResumen() {
 		List<ConsultaResumenDTO> consultas = new ArrayList<>();
@@ -130,54 +135,51 @@ public class ConsultaController {
 		return new ResponseEntity<List<ConsultaResumenDTO>>(consultas, HttpStatus.OK);
 
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
 	@GetMapping(value = "/generarReporte", produces = "application/octet-stream")
-	public ResponseEntity<byte[]> generarReporte(){
-	byte[] data = null;
-	data = service.generarReporte();
-	
-	 String fileName = "reporte-personalizado.pdf";
-	
- // Retornar la respuesta con los datos, encabezados y estado HTTP
-    return ResponseEntity.ok()
-    		.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
-            .body(data);
+	public ResponseEntity<byte[]> generarReporte() {
+		byte[] data = null;
+		data = service.generarReporte();
+
+		String fileName = "reporte-personalizado.pdf";
+
+		// Retornar la respuesta con los datos, encabezados y estado HTTP
+		return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+				.body(data);
 	}
-	
-	
-	
-	
-	
-	
-	
+
 	
 	
 	@GetMapping(value = "/generarReportePdfViewer", produces = "application/pdf")
-	public ResponseEntity<ByteArrayResource> generarReportePdfViewer(){
-	byte[] data = null;
-	data = service.generarReportePdfViewer();
-	  try {
-		  ByteArrayResource resource = new ByteArrayResource(data);
-	        return ResponseEntity.ok()
-	                             .header("Content-Disposition", "inline; filename=reporte.pdf") // "inline" para que se pueda visualizar en el navegador
-	                             .header("Content-Type", "application/pdf")
-	                             .body(resource); 
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        return ResponseEntity.status(500).build();
-	    }
-	 
+	public ResponseEntity<ByteArrayResource> generarReportePdfViewer() {
+		byte[] data = null;
+		data = service.generarReportePdfViewer();
+		try {
+			ByteArrayResource resource = new ByteArrayResource(data);
+			return ResponseEntity.ok().header("Content-Disposition", "inline; filename=reporte.pdf") // "inline" para
+																										// que se pueda visualizar en el navegador																								
+								   .header("Content-Type", "application/pdf").body(resource);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(500).build();
+		}
+
 	}
 	
+	
+	
 
+	@PostMapping(value = "/guardarArchivo", consumes = { org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE })
+	public ResponseEntity<Integer> guardarArchivo(@RequestParam("adjunto") MultipartFile file) throws IOException {
+	int rpta = 0;
+
+	Archivo ar = new Archivo();
+	ar.setFiletype(file.getContentType());
+	ar.setFilename(file.getName());
+	ar.setValue(file.getBytes());
+
+	rpta = serviceArchivo.guardar(ar);
+
+	return new ResponseEntity<Integer>(rpta, HttpStatus.OK);
+	}
 }
