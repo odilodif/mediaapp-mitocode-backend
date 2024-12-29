@@ -31,7 +31,7 @@ import com.mitocode.model.Archivo;
 import com.mitocode.model.Consulta;
 import com.mitocode.service.IArchivoService;
 import com.mitocode.service.IConsultaService;
-
+import org.apache.commons.codec.binary.Base64;
 import net.sf.jasperreports.engine.JRException;
 
 /************************************
@@ -46,7 +46,7 @@ public class ConsultaController {
 
 	@Autowired
 	private IConsultaService service;
-	
+
 	@Autowired
 	private IArchivoService serviceArchivo;
 
@@ -148,8 +148,6 @@ public class ConsultaController {
 				.body(data);
 	}
 
-	
-	
 	@GetMapping(value = "/generarReportePdfViewer", produces = "application/pdf")
 	public ResponseEntity<ByteArrayResource> generarReportePdfViewer() {
 		byte[] data = null;
@@ -157,29 +155,39 @@ public class ConsultaController {
 		try {
 			ByteArrayResource resource = new ByteArrayResource(data);
 			return ResponseEntity.ok().header("Content-Disposition", "inline; filename=reporte.pdf") // "inline" para
-																										// que se pueda visualizar en el navegador																								
-								   .header("Content-Type", "application/pdf").body(resource);
+																										// que se pueda
+																										// visualizar en
+																										// el navegador
+					.header("Content-Type", "application/pdf").body(resource);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return ResponseEntity.status(500).build();
 		}
 
 	}
-	
-	
-	
 
 	@PostMapping(value = "/guardarArchivo", consumes = { org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE })
 	public ResponseEntity<Integer> guardarArchivo(@RequestParam("adjunto") MultipartFile file) throws IOException {
-	int rpta = 0;
+		int rpta = 0;
 
-	Archivo ar = new Archivo();
-	ar.setFiletype(file.getContentType());
-	ar.setFilename(file.getName());
-	ar.setValue(file.getBytes());
+		Archivo ar = new Archivo();
+		ar.setFiletype(file.getContentType());
+		ar.setFilename(file.getName());
+		ar.setValue(file.getBytes());
 
-	rpta = serviceArchivo.guardar(ar);
+		rpta = serviceArchivo.guardar(ar);
 
-	return new ResponseEntity<Integer>(rpta, HttpStatus.OK);
+		return new ResponseEntity<Integer>(rpta, HttpStatus.OK);
 	}
+
+	@GetMapping(value = "/leerArchivo/{idArchivo}", produces = org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE)
+	public ResponseEntity<String> leerArchivo(@PathVariable("idArchivo") Integer idArchivo) throws IOException {
+
+		byte[] arr = serviceArchivo.leerArchivo(idArchivo);
+		String base64Encoded = Base64.encodeBase64String(arr);
+		//System.out.println("Base64: "+ base64Encoded);
+		//return new ResponseEntity<byte[]>(arr, HttpStatus.OK);
+		 return ResponseEntity.ok(base64Encoded);
+	}
+
 }
