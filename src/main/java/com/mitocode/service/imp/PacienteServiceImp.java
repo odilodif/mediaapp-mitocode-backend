@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.mitocode.model.Paciente;
@@ -46,6 +48,12 @@ public class PacienteServiceImp  implements IPacienteService{   //Implementa la 
 		repo.deleteById(id);
 		return true;
 		
+	}
+
+	@Override
+	public Page<Paciente> listarPageable(Pageable pageable) {
+		// TODO Auto-generated method stub
+		return repo.findAll(pageable);
 	}
 
 }

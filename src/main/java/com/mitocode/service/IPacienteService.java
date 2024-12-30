@@ -2,6 +2,9 @@ package com.mitocode.service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import com.mitocode.model.Paciente;
 
 public interface IPacienteService extends ICRUD<Paciente, Integer> { // Se aplica que una Interfaz puede heredar de varias Interfaces pero no puede implementar de otra Interfaz
@@ -12,4 +15,6 @@ public interface IPacienteService extends ICRUD<Paciente, Integer> { // Se aplic
 	List<Paciente> lista();
 	Paciente listarPorId(Integer id);
 	void eliminar(Integer id);*/
+	
+	Page<Paciente>listarPageable (Pageable pageable);
 }

@@ -4,6 +4,8 @@ import java.net.URI;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,18 +26,34 @@ import com.mitocode.service.IPacienteService;
  * Rutas
  **************************************************/
 
-@RestController 								//Indicamos a spring que este es un servicio RestController Rutas manejo de Rutas				
-@RequestMapping("/pacientes") 					// Definimos la ruta sustantivo en plural, con anotacion RequesteMaping la ruta "/pacientes"
+@RestController // Indicamos a spring que este es un servicio RestController Rutas manejo de
+				// Rutas
+@RequestMapping("/pacientes") // Definimos la ruta sustantivo en plural, con anotacion RequesteMaping la ruta
+								// "/pacientes"
 public class PacienteController {
 
-	@Autowired									// Se instancia con el Autowired  IPacienteService = new PacienteServiceImp() como se dejo preparado en PacienteServiceImp devido a que esta fue implemetada de la Interfaz IPacienteService ero no se escribe NEW
-	private IPacienteService service; 			// Se instancia con el Autowired  IPacienteService = new PacienteServiceImp() como se dejo preparado en PacienteServiceImp devido a que esta fue implemetada de la Interfaz IPacienteService pero no se escribe NEW 
+	@Autowired // Se instancia con el Autowired IPacienteService = new PacienteServiceImp()
+				// como se dejo preparado en PacienteServiceImp devido a que esta fue
+				// implemetada de la Interfaz IPacienteService ero no se escribe NEW
+	private IPacienteService service; // Se instancia con el Autowired IPacienteService = new PacienteServiceImp()
+										// como se dejo preparado en PacienteServiceImp devido a que esta fue
+										// implemetada de la Interfaz IPacienteService pero no se escribe NEW
 
 	@GetMapping
 	public ResponseEntity<List<Paciente>> listar() {
 		List<Paciente> lista = service.lista();
 		return new ResponseEntity<List<Paciente>>(lista, HttpStatus.OK);
 	}
+
+	
+	@GetMapping("/pageable")
+	public ResponseEntity<Page<Paciente>> listarPageable(Pageable pageable) {
+		Page<Paciente> pacientes = service.listarPageable(pageable);
+		return new ResponseEntity<Page<Paciente>>(pacientes, HttpStatus.OK);
+
+	}
+	
+	
 
 	@GetMapping("/{id}")
 	public ResponseEntity<Paciente> listarPorId(@PathVariable("id") Integer id) {
@@ -52,7 +70,6 @@ public class PacienteController {
 		return new ResponseEntity<Paciente>(obj, HttpStatus.OK);
 	}
 
-	
 	@PostMapping
 	public ResponseEntity<Paciente> registrar(@RequestBody Paciente obj) {
 
@@ -60,18 +77,17 @@ public class PacienteController {
 		return new ResponseEntity<Paciente>(pac, HttpStatus.CREATED);
 	}
 
-	
-	/*@PostMapping
-	public ResponseEntity<Object> registrar(@RequestBody Paciente obj) {
-		
-		Paciente pac = service.registrar(obj);
-		//localhost:8080/pacientes/5
-		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(pac.getIdPaciente()).toUri();
-		return ResponseEntity.created(location).build();
-	}*/
-	
-	
-	
+	/*
+	 * @PostMapping public ResponseEntity<Object> registrar(@RequestBody Paciente
+	 * obj) {
+	 * 
+	 * Paciente pac = service.registrar(obj); //localhost:8080/pacientes/5 URI
+	 * location =
+	 * ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand
+	 * (pac.getIdPaciente()).toUri(); return
+	 * ResponseEntity.created(location).build(); }
+	 */
+
 	@PutMapping
 	public ResponseEntity<Paciente> modificar(@RequestBody Paciente obj) {
 
